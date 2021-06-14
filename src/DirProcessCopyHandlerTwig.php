@@ -1,7 +1,8 @@
 <?php
 namespace DirProcessCopyHandlerTwig;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+use \Michelf\Markdown;
 
 /**
  * TwigHandler
@@ -26,19 +27,14 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
     public function handle(string $filepath = '')
     {
         $c = $this->config;
-        #echo 'filepath<pre>'; var_dump($filepath); echo '</pre>';
 
         $filepath_relative = str_replace($c['dpc_input_dir'], '', $filepath);
-        #echo 'filepath_relative<pre>'; var_dump($filepath_relative); echo '</pre>';
-
 
         // The file really should exist or this wont have been called, but check anyway:
         if (!file_exists($filepath)) {
             return false;
         }
 
-
-        #echo 'templates_dir<pre>'; var_dump($c); echo '</pre>';
         if (isset($c['twig_handler']['templates_dir'])) {
             $templates_dir = $c['twig_handler']['templates_dir'];
         } else {
@@ -49,12 +45,10 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
             // We could return true here to just copy the file if that's a more useful default.
             // I'm not sure.
         }
-        #echo 'templates_dir<pre>'; var_dump($templates_dir); echo '</pre>';
+
         $loader = new \Twig\Loader\FilesystemLoader($templates_dir);
         $twig   = new \Twig\Environment($loader);
-
-        // Will probably need this, but not Markdown installed yet, so just for reference
-        /*
+       
         // Add markdown filter:
         $md_filter = new \Twig\TwigFilter('md', function ($string) {
             $new_string = '';
@@ -64,7 +58,7 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
         });
 
         $twig->addFilter($md_filter);
-        */
+        
 
         // Also these filters might be handy:
         /*
@@ -128,17 +122,13 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
         */
 
 
-        $output = $twig->render($filepath_relative);
-        #$output = $twig->render($filepath_relative, array('data' => $json));
-
+        if (!empty($c['twig_handler']['data']) && is_array($c['twig_handler']['data'])) {
+            $output = $twig->render($filepath_relative, ['data' => $c['twig_handler']['data']]);
+        } else {
+            $output = $twig->render($filepath_relative);
+        }
+        
         $tidy_available = extension_loaded('tidy');
-        #echo '<pre>'; var_dump($tidy_available); echo '</pre>';
-
-        #echo 'tidy_clean_repair<pre>'; var_dump(function_exists('tidy_clean_repair')); echo '</pre>';
-
-
-        #exit;
-
 
         if ($tidy_available) {
             // Tidy the output:
@@ -154,24 +144,11 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
             $tidy->cleanRepair();
             $output = tidy_get_output($tidy);
 
-            /*$x = new \DOMDocument;
-            $x->loadHTML($output);
-            $output = $x->saveXML();*/
-
-            /*$dom = new \DOMDocument();
-            $dom->preserveWhiteSpace = false;
-            $dom->loadHTML($output, LIBXML_HTML_NOIMPLIED);
-            $dom->loadHTML($output);
-            $dom->formatOutput = true;
-            $output = $dom->saveHTML($dom->documentElement);*/
-
         }
 
         $tmp_filepath = trim(str_replace($c['dpc_input_dir'], $c['dpc_process_dir'], $filepath), '.twig');
 
         file_put_contents($tmp_filepath, $output);
-
-        ##copy($filepath, $tmp_filepath);
 
         // We don't want the original file added to the 'copy list' so return false:
         return false;
