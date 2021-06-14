@@ -1,15 +1,15 @@
 {
     "name": "akirk/dirprocesscopyhandlertwig",
-    "type": "project",
+    "type": "library",
     "description": "A plugin for DirProcessCopy to process Twig files",
     "keywords": ["DirProcessCopy", "DirProcessCopyHandlerTwig", "Twig"],
-    "homepage": "https://github.com/andykirk/DirProcessCopyTwigHandler",
+    "homepage": "https://github.com/andykirk/DirProcessCopyHandlerTwig",
     "license": "MIT",
     "authors": [
         {
             "name": "Andy Kirk",
-            "email": "andy@anykirk.net",
-            "homepage": "https://www.anykirk.net"
+            "email": "andy@andykirk.net",
+            "homepage": "https://www.andykirk.net"
         }
     ],
     "require": {
