@@ -29,7 +29,8 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
         $c = $this->config;
 
         $filepath_relative = str_replace($c['dpc_input_dir'], '', $filepath);
-
+        $page_path = str_replace('index.html.twig', '', $filepath_relative);
+        #echo '<pre>'; var_dump($page_path); echo '</pre>'; #exit;
         // The file really should exist or this wont have been called, but check anyway:
         if (!file_exists($filepath)) {
             return false;
@@ -48,7 +49,7 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
 
         $loader = new \Twig\Loader\FilesystemLoader($templates_dir);
         $twig   = new \Twig\Environment($loader);
-       
+
         // Add markdown filter:
         $md_filter = new \Twig\TwigFilter('md', function ($string) {
             $new_string = '';
@@ -58,7 +59,7 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
         });
 
         $twig->addFilter($md_filter);
-        
+
 
         // Also these filters might be handy:
         /*
@@ -123,11 +124,23 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
 
 
         if (!empty($c['twig_handler']['data']) && is_array($c['twig_handler']['data'])) {
-            $output = $twig->render($filepath_relative, ['data' => $c['twig_handler']['data']]);
+            $site_data = $c['twig_handler']['data'];
+            
+            #echo '<pre>'; var_dump($site_data['children_map']); echo '</pre>'; exit;
+            if (isset($site_data['children_map'][$page_path])) {
+                $page_data = $site_data['children_map'][$page_path];
+            } else {
+                $page_data = $site_data;
+            }
+            
+            $output = $twig->render($filepath_relative, [
+                'site_data' => $site_data,
+                'page_data' => $page_data
+            ]);
         } else {
             $output = $twig->render($filepath_relative);
         }
-        
+
         $tidy_available = extension_loaded('tidy');
 
         if ($tidy_available) {
