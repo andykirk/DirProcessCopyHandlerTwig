@@ -126,7 +126,9 @@ class DirProcessCopyHandlerTwig extends \DirProcessCopy\PluginHandler\PluginAbst
         if (!empty($c['twig_handler']['data']) && is_array($c['twig_handler']['data'])) {
             $site_data = $c['twig_handler']['data'];
             
-            #echo '<pre>'; var_dump($site_data['children_map']); echo '</pre>'; exit;
+            #echo '<pre>'; var_dump($site_data['children_map']); echo '</pre>'; #exit;
+            #echo '<pre>'; var_dump($page_path); echo '</pre>'; #exit;
+            #echo '<pre>'; var_dump($site_data['children_map'][$page_path]['body']); echo '</pre>'; #exit;
             if (isset($site_data['children_map'][$page_path])) {
                 $page_data = $site_data['children_map'][$page_path];
             } else {
